@@ -2037,7 +2037,7 @@ dependencies = [
 [[package]]
 name = "isomdl180137"
 version = "0.1.0"
-source = "git+ssh://git@github.com/spruceid/isomdl-18013-7.git?rev=246b710#246b7104dc0dc62487c964bcbe4ba59443bc09ca"
+source = "git+ssh://git@github.com/spruceid/isomdl-18013-7.git?rev=7a074ea#7a074ea36c6fd53fbe2f74781543dd6d02350670"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -2052,7 +2052,7 @@ dependencies = [
  "elliptic-curve 0.13.5",
  "isomdl",
  "josekit",
- "oidc4vp 0.1.0 (git+https://github.com/spruceid/oidc4vp-rs.git?rev=a416870)",
+ "oidc4vp 0.1.0 (git+https://github.com/spruceid/oidc4vp-rs.git?rev=ef2aa2f)",
  "openidconnect",
  "p256 0.13.2",
  "rand 0.8.5",
@@ -2066,7 +2066,7 @@ dependencies = [
  "serde_with 2.3.3",
  "signature 2.1.0",
  "siop",
- "ssi",
+ "ssi 0.6.0",
  "tracing",
  "url",
  "uuid",
@@ -2801,7 +2801,21 @@ dependencies = [
 [[package]]
 name = "oidc4vp"
 version = "0.1.0"
-source = "git+https://github.com/spruceid/oidc4vp-rs.git?rev=a416870#a41687054a7bd7957c2e6993067024e0c23171e5"
+source = "git+https://github.com/spruceid/oidc4vp-rs?rev=dd06e4e#dd06e4eb216328cb659773d066983622671584f0"
+dependencies = [
+ "jsonpath-rust",
+ "lazy_static",
+ "serde",
+ "serde_json",
+ "ssi 0.6.0",
+ "thiserror",
+ "uuid",
+]
+
+[[package]]
+name = "oidc4vp"
+version = "0.1.0"
+source = "git+https://github.com/spruceid/oidc4vp-rs.git?rev=ef2aa2f#ef2aa2f85c4cdcba66c07020007544dc3d345208"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -2817,26 +2831,12 @@ dependencies = [
  "serde",
  "serde_cbor",
  "serde_json",
- "ssi",
+ "ssi 0.6.0",
  "thiserror",
  "time 0.3.25",
  "url",
  "uuid",
  "x509-cert 0.2.4",
-]
-
-[[package]]
-name = "oidc4vp"
-version = "0.1.0"
-source = "git+https://github.com/spruceid/oidc4vp-rs?rev=dd06e4e#dd06e4eb216328cb659773d066983622671584f0"
-dependencies = [
- "jsonpath-rust",
- "lazy_static",
- "serde",
- "serde_json",
- "ssi",
- "thiserror",
- "uuid",
 ]
 
 [[package]]
@@ -4009,7 +4009,7 @@ dependencies = [
  "oidc4vp 0.1.0 (git+https://github.com/spruceid/oidc4vp-rs?rev=dd06e4e)",
  "openidconnect",
  "serde",
- "ssi",
+ "ssi 0.6.0",
  "thiserror",
 ]
 
@@ -4152,7 +4152,29 @@ dependencies = [
  "ssi-ssh",
  "ssi-tzkey",
  "ssi-ucan",
- "ssi-vc",
+ "ssi-vc 0.1.3",
+ "ssi-zcap-ld",
+]
+
+[[package]]
+name = "ssi"
+version = "0.7.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8d6e7ea685d83ca9683a0c7876c6b99196049d000dc22dfabb1398603b935e56"
+dependencies = [
+ "ssi-caips",
+ "ssi-core",
+ "ssi-crypto",
+ "ssi-dids",
+ "ssi-json-ld",
+ "ssi-jwk",
+ "ssi-jws",
+ "ssi-jwt",
+ "ssi-ldp 0.3.0",
+ "ssi-ssh",
+ "ssi-tzkey",
+ "ssi-ucan",
+ "ssi-vc 0.2.0",
  "ssi-zcap-ld",
 ]
 
@@ -4362,9 +4384,12 @@ dependencies = [
  "hex",
  "iref",
  "json-syntax",
+ "k256",
+ "keccak-hash",
  "lazy_static",
  "locspan",
  "multibase 0.8.0",
+ "p256 0.11.1",
  "rdf-types",
  "serde",
  "serde_jcs",
@@ -4378,6 +4403,7 @@ dependencies = [
  "ssi-json-ld",
  "ssi-jwk",
  "ssi-jws",
+ "ssi-tzkey",
  "static-iref",
  "thiserror",
 ]
@@ -4453,6 +4479,35 @@ dependencies = [
  "ssi-jws",
  "ssi-jwt",
  "ssi-ldp 0.2.1",
+ "thiserror",
+]
+
+[[package]]
+name = "ssi-vc"
+version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "66e7a8fdaad27ffd172183d6bd605cd77c28c5378e8184a462ebc8df8c06f212"
+dependencies = [
+ "async-trait",
+ "base64 0.12.3",
+ "bitvec",
+ "cacaos",
+ "chrono",
+ "flate2",
+ "iref",
+ "libipld",
+ "multihash",
+ "reqwest",
+ "serde",
+ "serde_json",
+ "siwe-recap",
+ "ssi-core",
+ "ssi-dids",
+ "ssi-json-ld",
+ "ssi-jwk",
+ "ssi-jws",
+ "ssi-jwt",
+ "ssi-ldp 0.3.0",
  "thiserror",
 ]
 
@@ -4898,13 +4953,17 @@ checksum = "49874b5167b65d7193b8aba1567f5c7d93d001cafc34600cee003eda787e483f"
 name = "vp_interop_cli_wallet"
 version = "0.1.0"
 dependencies = [
+ "anyhow",
  "clap",
  "isomdl180137",
+ "josekit",
+ "oidc4vp 0.1.0 (git+https://github.com/spruceid/oidc4vp-rs.git?rev=ef2aa2f)",
  "p256 0.13.2",
  "rand 0.8.5",
  "reqwest",
  "serde",
  "serde_json",
+ "ssi 0.7.0",
  "time 0.3.25",
  "tokio",
  "url",
