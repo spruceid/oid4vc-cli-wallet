@@ -349,7 +349,7 @@ async fn send(response_uri: String, jwe: String) -> Result<String> {
         bail!("'{status}': {body}")
     }
     if !status.is_redirection() {
-        println!("WARNING: response was not a redirection '{status}': {body}");
+        bail!("response was not a redirection '{status}': {body}");
     }
     location
         .context("'location' header was missing in redirect")?
