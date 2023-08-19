@@ -323,6 +323,11 @@ async fn finish(key: SecretKey, prepared: PreparedDeviceResponse, state: State) 
         .context("failed to complete and encrypt response")
 }
 
+#[derive(Deserialize)]
+struct Response {
+    redirect_uri: String,
+}
+
 async fn send(response_uri: String, jwe: String) -> Result<String> {
     let mut body = Map::new();
     body.insert("response".to_string(), serde_json::Value::String(jwe));
@@ -337,23 +342,18 @@ async fn send(response_uri: String, jwe: String) -> Result<String> {
         .await
         .context("failed to submit response")?;
     let status = response.status();
-    let location = response
-        .headers()
-        .get("location")
-        .map(|v| v.to_str().map(|s| s.to_string()));
-    let body = response
-        .text()
-        .await
-        .context("response could not be parsed as text")?;
     if status.is_server_error() || status.is_client_error() {
+        let body = response
+            .text()
+            .await
+            .context("response could not be parsed as text")?;
         bail!("'{status}': {body}")
     }
-    if !status.is_redirection() {
-        bail!("response was not a redirection '{status}': {body}");
-    }
-    location
-        .context("'location' header was missing in redirect")?
-        .context("could not parse 'location' header as a UTF8 string")
+    let body: Response = response
+        .json()
+        .await
+        .context("response could not be parsed as json")?;
+    Ok(body.redirect_uri)
 }
 
 async fn handle_request(request: Url) -> Result<()> {
