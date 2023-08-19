@@ -22,6 +22,7 @@ use p256::{
     ecdsa::{signature::Signer, Signature, SigningKey},
     SecretKey,
 };
+use reqwest::redirect::Policy;
 use serde::{Deserialize, Serialize};
 use serde_json::{Map, Value};
 use tokio::{
@@ -320,7 +321,10 @@ async fn finish(key: SecretKey, prepared: PreparedDeviceResponse, state: State) 
 async fn send(response_uri: String, jwe: String) -> Result<String> {
     let mut body = Map::new();
     body.insert("response".to_string(), serde_json::Value::String(jwe));
-    let client = reqwest::Client::new();
+    let client = reqwest::Client::builder()
+        .redirect(Policy::none())
+        .build()
+        .context("unable to build http client")?;
     let response = client
         .post(response_uri)
         .form(&body)
@@ -328,17 +332,23 @@ async fn send(response_uri: String, jwe: String) -> Result<String> {
         .await
         .context("failed to submit response")?;
     let status = response.status();
+    let location = response
+        .headers()
+        .get("location")
+        .map(|v| v.to_str().map(|s| s.to_string()));
     let body = response
         .text()
         .await
         .context("response could not be parsed as text")?;
     if status.is_server_error() || status.is_client_error() {
-        bail!("error '{status}': {body}")
+        bail!("'{status}': {body}")
     }
     if !status.is_redirection() {
         println!("WARNING: response was not a redirection '{status}': {body}");
     }
-    Ok(body)
+    location
+        .context("'location' header was missing in redirect")?
+        .context("could not parse 'location' header as a UTF8 string")
 }
 
 async fn handle_request(request: Url) -> Result<()> {
@@ -367,7 +377,8 @@ async fn handle_request(request: Url) -> Result<()> {
     println!("POSTing response to {response_uri}...");
     let redirect = send(response_uri, jwe).await?;
 
-    println!("SUCCESS! Please redirect yourself to {redirect}");
+    println!("SUCCESS! Redirecting to {redirect}");
+    open::that(redirect).context("failed to open redirect in default browser")?;
 
     Ok(())
 }
