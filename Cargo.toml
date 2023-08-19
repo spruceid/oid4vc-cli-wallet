@@ -8,7 +8,7 @@ edition = "2021"
 [dependencies]
 anyhow = "1.0.75"
 clap = { version = "4.3.21", features = ["derive"] }
-isomdl180137 = { git = "ssh://git@github.com/spruceid/isomdl-18013-7.git", rev = "7a074ea" }
+isomdl180137 = { git = "ssh://git@github.com/spruceid/isomdl-18013-7.git", rev = "b8b77e4" }
 josekit = { git = "https://github.com/cobward/josekit-rs", rev = "635c8a7" }
 oidc4vp = { git = "https://github.com/spruceid/oidc4vp-rs.git", rev = "ef2aa2f" }
 open = "5.0.0"

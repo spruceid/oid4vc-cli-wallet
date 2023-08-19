@@ -2056,7 +2056,7 @@ dependencies = [
 [[package]]
 name = "isomdl180137"
 version = "0.1.0"
-source = "git+ssh://git@github.com/spruceid/isomdl-18013-7.git?rev=7a074ea#7a074ea36c6fd53fbe2f74781543dd6d02350670"
+source = "git+ssh://git@github.com/spruceid/isomdl-18013-7.git?rev=b8b77e4#b8b77e497b918d12ddc6cf5bc702cbfa45953ddc"
 dependencies = [
  "anyhow",
  "async-trait",
