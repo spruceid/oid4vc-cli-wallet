@@ -224,6 +224,7 @@ fn construct_state(request: RequestObject, mdoc_nonce: String) -> Result<State> 
     const SUPPORTED_ALG: &'static str = "ECDH-ES";
     const SUPPORTED_ENC: &'static str = "A256GCM";
     const SUPPORTED_CRV: &'static str = "P-256";
+    const SUPPORTED_USE: &'static str = "enc";
 
     let MetaData::ClientMetadata {client_metadata} = request.client_metadata.clone() else { bail!("Expected 'client_metadata' in request object, received 'client_metadata_uri'") };
 
@@ -259,9 +260,13 @@ fn construct_state(request: RequestObject, mdoc_nonce: String) -> Result<State> 
                 println!("WARNING: jwk in keyset was missing 'crv'");
                 return false
             };
-            crv == SUPPORTED_CRV
+            let Some(use_) = jwk.key_use() else {
+                println!("WARNING: jwk in keyset was missing 'use'");
+                return false
+            };
+            crv == SUPPORTED_CRV && use_ == SUPPORTED_USE
         })
-        .context("no P-256 keys found in JWK keyset")?;
+        .context("no 'P-256' keys for use 'enc' found in JWK keyset")?;
 
     Ok(State {
         mdoc_nonce,
