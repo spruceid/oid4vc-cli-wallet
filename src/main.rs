@@ -1,4 +1,5 @@
 use anyhow::{bail, Context, Result};
+use base64::prelude::*;
 use clap::Parser;
 use isomdl180137::{
     isomdl::{
@@ -25,11 +26,17 @@ use p256::{
 use reqwest::redirect::Policy;
 use serde::{Deserialize, Serialize};
 use serde_json::{Map, Value};
+use ssi::jwk::JWK;
 use tokio::{
     fs::{create_dir, read_to_string, remove_dir_all, try_exists, File},
     io::AsyncWriteExt,
 };
 use url::Url;
+use x509_cert::{
+    der::{referenced::OwnedToRef, Decode},
+    ext::pkix::{name::GeneralName, SubjectAltName},
+    Certificate,
+};
 
 const DIR: &'static str = "/tmp/vp-interop-cli-wallet";
 const KEYFILE: &'static str = "/key.pem";
@@ -193,7 +200,114 @@ fn validate_authz_request(request: Url) -> Result<AuthorizationRequest> {
     })
 }
 
+fn validate_response_mode(request: &RequestObject) -> Result<()> {
+    const DIRECT_POST_JWT: &str = "direct_post.jwt";
+    let response_mode = request
+        .response_mode
+        .as_ref()
+        .context("'response_mode' was missing from request")?;
+    if response_mode != DIRECT_POST_JWT {
+        bail!("unsupported response mode: {response_mode}")
+    }
+    Ok(())
+}
+
+fn validate_cis_request_uri(request: &RequestObject) -> Result<()> {
+    let response_uri = request
+        .response_uri
+        .as_ref()
+        .context("'response_uri' was missing from request")?;
+    let client_id = &request.client_id;
+    if client_id != response_uri {
+        bail!("'client_id' and 'response_uri' do not match: '{client_id}' vs. '{response_uri}'")
+    }
+    Ok(())
+}
+
+fn validate_cis_x509_san_dns(client_id: &str, jwt: &str) -> Result<()> {
+    let (headers, _, _) = ssi::jws::split_jws(jwt).context("failed to split jwt into parts")?;
+
+    let headers_json_bytes = BASE64_URL_SAFE_NO_PAD
+        .decode(headers)
+        .context("jwt headers were not valid base64url")?;
+
+    let Value::Array(x5chain) = serde_json::from_slice::<Map<String, Value>>(&headers_json_bytes)
+            .context("jwt headers were not valid json")?
+            .remove("x5c")
+            .context("'x5c' was missing from jwt headers")?
+        else {
+            bail!("'x5c' header was not an array")
+        };
+
+    let Value::String(b64_x509) = x5chain.get(0).context("'x5c' was an empty array")?
+        else {
+            bail!("'x5c' header was not an array of strings");
+        };
+
+    let leaf_cert_der = BASE64_STANDARD_NO_PAD
+        .decode(b64_x509.trim_end_matches('='))
+        .context("leaf certificate in 'x5c' was not valid base64")?;
+
+    let leaf_cert = Certificate::from_der(&leaf_cert_der)
+        .context("leaf certificate in 'x5c' was not valid DER")?;
+
+    if leaf_cert.tbs_certificate.get::<SubjectAltName>() == Ok(None) {
+        println!("WARNING: Missing SubjectAlternativeName in x509 cert.");
+        if leaf_cert
+            .tbs_certificate
+            .subject
+            .0
+            .iter()
+            .flat_map(|n| n.0.iter())
+            .filter_map(|n| n.to_string().strip_prefix("CN=").map(ToOwned::to_owned))
+            .any(|cn| cn == client_id)
+        {
+            bail!("subject CN did not match client id")
+        }
+    }
+
+    if !leaf_cert
+        .tbs_certificate
+        .filter::<SubjectAltName>()
+        .filter_map(|r| match r {
+            Ok((_crit, san)) => Some(san.0.into_iter()),
+            Err(e) => {
+                println!("WARNING: Unable to parse SubjectAlternativeName from DER: {e}");
+                None
+            }
+        })
+        .flatten()
+        .filter_map(|gn| match gn {
+            GeneralName::UniformResourceIdentifier(uri) => Some(uri.to_string()),
+            _ => {
+                println!("WARNING: Found non-URI SAN: {gn:?}");
+                None
+            }
+        })
+        .any(|uri| uri == client_id)
+    {
+        bail!("'client_id' does not match any SubjectAlternativeName in leaf certificate")
+    }
+
+    let pk: p256::PublicKey = leaf_cert
+        .tbs_certificate
+        .subject_public_key_info
+        .owned_to_ref()
+        .try_into()
+        .context("unable to parse SPKI as p256 public key")?;
+
+    let jwk: JWK = serde_json::from_str(&pk.to_jwk_string()).context("unable to parse JWK")?;
+
+    let _: RequestObject =
+        ssi::jwt::decode_verify(jwt, &jwk).context("unable to verify request JWT signature")?;
+
+    Ok(())
+}
+
 async fn get_request_object(request_uri: Url) -> Result<RequestObject> {
+    const REDIRECT_URI: &str = "redirect_uri";
+    const X509_SAN_URI: &str = "x509_san_uri";
+
     let res = reqwest::get(request_uri.clone())
         .await
         .context(format!("could not GET @ {request_uri}"))?;
@@ -207,7 +321,20 @@ async fn get_request_object(request_uri: Url) -> Result<RequestObject> {
         bail!("'{status}' error GETing '{request_uri}': {body}")
     }
 
-    ssi::jwt::decode_unverified(&body).context("unable to decode JWT")
+    let request: RequestObject =
+        ssi::jwt::decode_unverified(&body).context("unable to decode JWT")?;
+    validate_response_mode(&request)?;
+    match request
+        .client_id_scheme
+        .as_ref()
+        .context("'client_id_scheme' was missing from request")?
+    {
+        s if s == REDIRECT_URI => validate_cis_request_uri(&request)?,
+        s if s == X509_SAN_URI => validate_cis_x509_san_dns(&request.client_id, &body)?,
+        other => bail!("unrecognised client id scheme: {other}"),
+    };
+
+    Ok(request)
 }
 
 fn request_object_to_handover(req: &RequestObject, mdoc_nonce: String) -> Result<OID4VPHandover> {

@@ -4990,6 +4990,7 @@ name = "vp_interop_cli_wallet"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "base64 0.21.2",
  "clap",
  "isomdl180137",
  "josekit",
@@ -5004,6 +5005,7 @@ dependencies = [
  "time 0.3.25",
  "tokio",
  "url",
+ "x509-cert 0.2.4",
 ]
 
 [[package]]
