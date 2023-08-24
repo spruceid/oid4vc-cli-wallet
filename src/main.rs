@@ -38,9 +38,9 @@ use x509_cert::{
     Certificate,
 };
 
-const DIR: &'static str = "/tmp/vp-interop-cli-wallet";
-const KEYFILE: &'static str = "/key.pem";
-const MDLFILE: &'static str = "/mdl";
+const DIR: &str = "/tmp/vp-interop-cli-wallet";
+const KEYFILE: &str = "/key.pem";
+const MDLFILE: &str = "/mdl";
 
 #[derive(clap::Parser)]
 struct Args {
@@ -57,18 +57,6 @@ enum Action {
         #[arg(short, long)]
         request: Url,
     },
-}
-
-#[derive(Debug, Clone, clap::ValueEnum)]
-enum SupportedAlgorithm {
-    ES256,
-}
-
-#[derive(Debug, Clone, clap::ValueEnum)]
-enum KeyForm {
-    PEM,
-    DER,
-    JWK,
 }
 
 #[tokio::main(flavor = "current_thread")]
@@ -91,16 +79,13 @@ struct SideloaderResponse {
 }
 
 async fn get_mdl() {
-    const DIR: &'static str = "/tmp/vp-interop-cli-wallet";
+    const DIR: &str = "/tmp/vp-interop-cli-wallet";
     println!("clearing out old data...");
 
-    match try_exists(DIR).await {
-        Ok(true) => {
-            remove_dir_all(DIR)
-                .await
-                .expect("unable to clear out old data");
-        }
-        _ => (),
+    if let Ok(true) = try_exists(DIR).await {
+        remove_dir_all(DIR)
+            .await
+            .expect("unable to clear out old data");
     }
 
     create_dir(DIR).await.expect("unable to create dir");
@@ -173,7 +158,7 @@ struct AuthorizationRequest {
 }
 
 fn validate_authz_request(request: Url) -> Result<AuthorizationRequest> {
-    const SCHEME: &'static str = "mdoc-openid4vp";
+    const SCHEME: &str = "mdoc-openid4vp";
     let scheme = request.scheme();
     if scheme != SCHEME {
         println!("WARNING: Request scheme was invalid: '{scheme}'")
@@ -348,10 +333,10 @@ fn request_object_to_handover(req: &RequestObject, mdoc_nonce: String) -> Result
 }
 
 fn construct_state(request: RequestObject, mdoc_nonce: String) -> Result<State> {
-    const SUPPORTED_ALG: &'static str = "ECDH-ES";
-    const SUPPORTED_ENC: &'static str = "A256GCM";
-    const SUPPORTED_CRV: &'static str = "P-256";
-    const SUPPORTED_USE: &'static str = "enc";
+    const SUPPORTED_ALG: &str = "ECDH-ES";
+    const SUPPORTED_ENC: &str = "A256GCM";
+    const SUPPORTED_CRV: &str = "P-256";
+    const SUPPORTED_USE: &str = "enc";
 
     let MetaData::ClientMetadata {client_metadata} = request.client_metadata.clone() else { bail!("Expected 'client_metadata' in request object, received 'client_metadata_uri'") };
 
