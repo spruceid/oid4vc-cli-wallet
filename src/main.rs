@@ -210,6 +210,7 @@ fn validate_cis_request_uri(request: &RequestObject) -> Result<()> {
 }
 
 fn validate_cis_x509_san_dns(client_id: &str, jwt: &str) -> Result<()> {
+    println!("client_id: {:?}", client_id);
     let (headers, _, _) = ssi::jws::split_jws(jwt).context("failed to split jwt into parts")?;
 
     let headers_json_bytes = BASE64_URL_SAFE_NO_PAD
@@ -238,14 +239,16 @@ fn validate_cis_x509_san_dns(client_id: &str, jwt: &str) -> Result<()> {
 
     if leaf_cert.tbs_certificate.get::<SubjectAltName>() == Ok(None) {
         println!("WARNING: Missing SubjectAlternativeName in x509 cert.");
-        if leaf_cert
+        if !leaf_cert
             .tbs_certificate
             .subject
             .0
             .iter()
             .flat_map(|n| n.0.iter())
             .filter_map(|n| n.to_string().strip_prefix("CN=").map(ToOwned::to_owned))
-            .any(|cn| cn == client_id)
+            .any(|cn| { 
+                cn == client_id
+            })
         {
             bail!("subject CN did not match client id")
         }
