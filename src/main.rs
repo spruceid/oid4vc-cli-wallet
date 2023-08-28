@@ -246,9 +246,7 @@ fn validate_cis_x509_san_dns(client_id: &str, jwt: &str) -> Result<()> {
             .iter()
             .flat_map(|n| n.0.iter())
             .filter_map(|n| n.to_string().strip_prefix("CN=").map(ToOwned::to_owned))
-            .any(|cn| { 
-                cn == client_id
-            })
+            .any(|cn| cn == client_id)
         {
             bail!("subject CN did not match client id")
         }
@@ -375,11 +373,11 @@ fn construct_state(request: RequestObject, mdoc_nonce: String) -> Result<State> 
                 println!("WARNING: jwk in keyset was missing 'crv'");
                 return false
             };
-            let Some(use_) = jwk.key_use() else {
-                println!("WARNING: jwk in keyset was missing 'use'");
-                return false
-            };
-            crv == SUPPORTED_CRV && use_ == SUPPORTED_USE
+            if let Some(use_) = jwk.key_use() {
+                crv == SUPPORTED_CRV && use_ == SUPPORTED_USE
+            } else {
+                crv == SUPPORTED_CRV
+            }
         })
         .context("no 'P-256' keys for use 'enc' found in JWK keyset")?;
 
