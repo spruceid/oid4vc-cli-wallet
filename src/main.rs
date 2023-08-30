@@ -23,7 +23,7 @@ use p256::{
     ecdsa::{signature::Signer, Signature, SigningKey},
     SecretKey,
 };
-use reqwest::redirect::Policy;
+use reqwest::Client;
 use serde::{Deserialize, Serialize};
 use serde_json::{Map, Value};
 use ssi::jwk::JWK;
@@ -41,6 +41,13 @@ use x509_cert::{
 const DIR: &str = "/tmp/vp-interop-cli-wallet";
 const KEYFILE: &str = "/key.pem";
 const MDLFILE: &str = "/mdl";
+
+fn reqwest_client() -> Result<Client> {
+    reqwest::Client::builder()
+        .use_rustls_tls()
+        .build()
+        .context("unable to construct reqwest client")
+}
 
 #[derive(clap::Parser)]
 struct Args {
@@ -294,7 +301,9 @@ async fn get_request_object(request_uri: Url) -> Result<RequestObject> {
     const REDIRECT_URI: &str = "redirect_uri";
     const X509_SAN_URI: &str = "x509_san_uri";
 
-    let res = reqwest::get(request_uri.clone())
+    let res = reqwest_client()?
+        .get(request_uri.clone())
+        .send()
         .await
         .context(format!("could not GET @ {request_uri}"))?;
 
@@ -404,7 +413,7 @@ fn parse_request(
 
     let mdoc_nonce = isomdl180137::utils::gen_nonce();
     let handover = request_object_to_handover(&req, mdoc_nonce.clone())?;
-    let session_transcript = UnattendedSessionTranscript(handover);
+    let session_transcript = UnattendedSessionTranscript::new(handover);
     let session_manager = UnattendedSessionManager {
         session_transcript,
         documents,
@@ -444,11 +453,7 @@ struct Response {
 async fn send(response_uri: String, jwe: String) -> Result<String> {
     let mut body = Map::new();
     body.insert("response".to_string(), serde_json::Value::String(jwe));
-    let client = reqwest::Client::builder()
-        .redirect(Policy::none())
-        .build()
-        .context("unable to build http client")?;
-    let response = client
+    let response = reqwest_client()?
         .post(response_uri)
         .form(&body)
         .send()
