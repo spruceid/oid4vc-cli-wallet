@@ -2056,7 +2056,7 @@ dependencies = [
 [[package]]
 name = "isomdl180137"
 version = "0.1.0"
-source = "git+ssh://git@github.com/spruceid/isomdl-18013-7.git?rev=d50e8dc#d50e8dc1b75bb7b0861b82c284bd5b13f61c6e9c"
+source = "git+ssh://git@github.com/spruceid/isomdl-18013-7.git?rev=fda5949#fda59499a42198cb7cd33be74dd7a1749881109d"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -2071,7 +2071,7 @@ dependencies = [
  "elliptic-curve 0.13.5",
  "isomdl",
  "josekit",
- "oidc4vp 0.1.0 (git+https://github.com/spruceid/oidc4vp-rs.git?rev=ef2aa2f)",
+ "oidc4vp 0.1.0 (git+https://github.com/spruceid/oidc4vp-rs.git?rev=f9557eb)",
  "openidconnect",
  "p256 0.13.2",
  "rand 0.8.5",
@@ -2834,7 +2834,7 @@ dependencies = [
 [[package]]
 name = "oidc4vp"
 version = "0.1.0"
-source = "git+https://github.com/spruceid/oidc4vp-rs.git?rev=ef2aa2f#ef2aa2f85c4cdcba66c07020007544dc3d345208"
+source = "git+https://github.com/spruceid/oidc4vp-rs.git?rev=f9557eb#f9557eb8e779a7aab07b2682a4a518f3aeda9e3c"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -4994,7 +4994,7 @@ dependencies = [
  "clap",
  "isomdl180137",
  "josekit",
- "oidc4vp 0.1.0 (git+https://github.com/spruceid/oidc4vp-rs.git?rev=ef2aa2f)",
+ "oidc4vp 0.1.0 (git+https://github.com/spruceid/oidc4vp-rs.git?rev=f9557eb)",
  "open",
  "p256 0.13.2",
  "rand 0.8.5",
