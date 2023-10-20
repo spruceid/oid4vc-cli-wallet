@@ -1,6 +1,9 @@
+mod oid4vci;
+
 use anyhow::{bail, Context, Result};
 use base64::prelude::*;
 use clap::Parser;
+use didkit::ssi::{self, jwk::JWK};
 use isomdl180137::{
     isomdl::{
         definitions::helpers::NonEmptyMap,
@@ -15,6 +18,7 @@ use isomdl180137::{
     },
 };
 use josekit::jwk::Jwk;
+use oid4vci::initiate_oid4vci;
 use oidc4vp::{
     mdl_request::{MetaData, RequestObject},
     presentment::Present,
@@ -26,7 +30,6 @@ use p256::{
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
 use serde_json::{Map, Value};
-use ssi::jwk::JWK;
 use tokio::{
     fs::{create_dir, read_to_string, remove_dir_all, try_exists, File},
     io::AsyncWriteExt,
@@ -61,8 +64,13 @@ enum Action {
     GetMdl,
     /// Handle a request of the "openid4vp://?request_uri=..." and generate a response.
     HandleRequest {
-        #[arg(short, long)]
-        request: Url,
+        /// URL with protocol-specific scheme.
+        url: Url,
+    },
+    /// Initiate a OID4VCI flow
+    InitiateIssuance {
+        /// URL of the issuer
+        url: Url,
     },
 }
 
@@ -70,11 +78,15 @@ enum Action {
 async fn main() {
     match Args::parse().action {
         Action::GetMdl => get_mdl().await,
-        Action::HandleRequest { request } => {
-            if let Err(e) = handle_request(request).await {
+        Action::HandleRequest { url } => {
+            if let Err(e) = handle_request(url).await {
                 println!("ERROR: {e:?}")
             }
         }
+        Action::InitiateIssuance { url } => initiate_oid4vci(url)
+            .await
+            .context("Issuance failed")
+            .unwrap(),
     }
 }
 
@@ -225,17 +237,16 @@ fn validate_cis_x509_san_dns(client_id: &str, jwt: &str) -> Result<()> {
         .context("jwt headers were not valid base64url")?;
 
     let Value::Array(x5chain) = serde_json::from_slice::<Map<String, Value>>(&headers_json_bytes)
-            .context("jwt headers were not valid json")?
-            .remove("x5c")
-            .context("'x5c' was missing from jwt headers")?
-        else {
-            bail!("'x5c' header was not an array")
-        };
+        .context("jwt headers were not valid json")?
+        .remove("x5c")
+        .context("'x5c' was missing from jwt headers")?
+    else {
+        bail!("'x5c' header was not an array")
+    };
 
-    let Value::String(b64_x509) = x5chain.get(0).context("'x5c' was an empty array")?
-        else {
-            bail!("'x5c' header was not an array of strings");
-        };
+    let Value::String(b64_x509) = x5chain.get(0).context("'x5c' was an empty array")? else {
+        bail!("'x5c' header was not an array of strings");
+    };
 
     let leaf_cert_der = BASE64_STANDARD_NO_PAD
         .decode(b64_x509.trim_end_matches('='))
@@ -348,7 +359,9 @@ fn construct_state(request: RequestObject, mdoc_nonce: String) -> Result<State> 
     const SUPPORTED_CRV: &str = "P-256";
     const SUPPORTED_USE: &str = "enc";
 
-    let MetaData::ClientMetadata {client_metadata} = request.client_metadata.clone() else { bail!("Expected 'client_metadata' in request object, received 'client_metadata_uri'") };
+    let MetaData::ClientMetadata { client_metadata } = request.client_metadata.clone() else {
+        bail!("Expected 'client_metadata' in request object, received 'client_metadata_uri'")
+    };
 
     let alg = client_metadata.authorization_encrypted_response_alg;
     let enc = client_metadata.authorization_encrypted_response_enc;
@@ -360,9 +373,13 @@ fn construct_state(request: RequestObject, mdoc_nonce: String) -> Result<State> 
         bail!("unsupported encryption '{enc}'")
     };
 
-    let Value::Array(keys) = client_metadata.jwks.get("keys")
+    let Value::Array(keys) = client_metadata
+        .jwks
+        .get("keys")
         .context("missing field 'keys' in 'jwks'")?
-        else { bail!("expected an array of JWKs") };
+    else {
+        bail!("expected an array of JWKs")
+    };
 
     let jwk = keys
         .iter()
@@ -380,7 +397,7 @@ fn construct_state(request: RequestObject, mdoc_nonce: String) -> Result<State> 
         .find(|jwk| {
             let Some(crv) = jwk.curve() else {
                 println!("WARNING: jwk in keyset was missing 'crv'");
-                return false
+                return false;
             };
             if let Some(use_) = jwk.key_use() {
                 crv == SUPPORTED_CRV && use_ == SUPPORTED_USE
