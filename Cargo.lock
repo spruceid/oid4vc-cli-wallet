@@ -2469,7 +2469,7 @@ dependencies = [
 [[package]]
 name = "isomdl180137"
 version = "0.1.0"
-source = "git+ssh://git@github.com/spruceid/isomdl-18013-7.git?rev=7ee8bdb#7ee8bdb432db5e204c902e3708d07250f3e35ed1"
+source = "git+https://github.com/spruceid/isomdl-18013-7?rev=7ee8bdb#7ee8bdb432db5e204c902e3708d07250f3e35ed1"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -3333,7 +3333,7 @@ dependencies = [
 [[package]]
 name = "oid4vci"
 version = "0.1.0"
-source = "git+https://github.com/spruceid/oidc4vci-rs.git?rev=612ea3b#612ea3be3c3a6e72779e240fe30b97ee6eedde83"
+source = "git+https://github.com/spruceid/oid4vci-rs.git?rev=612ea3b#612ea3be3c3a6e72779e240fe30b97ee6eedde83"
 dependencies = [
  "async-signature",
  "base64 0.21.4",
@@ -3419,6 +3419,31 @@ dependencies = [
  "is-wsl",
  "libc",
  "pathdiff",
+]
+
+[[package]]
+name = "openid4ci-wallet"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "base64 0.21.4",
+ "clap",
+ "didkit",
+ "inquire",
+ "isomdl180137",
+ "josekit 0.8.3",
+ "oid4vci",
+ "oidc4vp 0.1.0 (git+https://github.com/spruceid/oidc4vp-rs.git?rev=f9557eb)",
+ "open",
+ "p256 0.13.2",
+ "rand",
+ "reqwest",
+ "serde",
+ "serde_json",
+ "time",
+ "tokio",
+ "url",
+ "x509-cert 0.2.4",
 ]
 
 [[package]]
@@ -5704,31 +5729,6 @@ name = "version_check"
 version = "0.9.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "49874b5167b65d7193b8aba1567f5c7d93d001cafc34600cee003eda787e483f"
-
-[[package]]
-name = "vp_interop_cli_wallet"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "base64 0.21.4",
- "clap",
- "didkit",
- "inquire",
- "isomdl180137",
- "josekit 0.8.3",
- "oid4vci",
- "oidc4vp 0.1.0 (git+https://github.com/spruceid/oidc4vp-rs.git?rev=f9557eb)",
- "open",
- "p256 0.13.2",
- "rand",
- "reqwest",
- "serde",
- "serde_json",
- "time",
- "tokio",
- "url",
- "x509-cert 0.2.4",
-]
 
 [[package]]
 name = "waker-fn"

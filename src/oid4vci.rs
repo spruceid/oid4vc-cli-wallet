@@ -25,11 +25,11 @@ use oid4vci::{
 use time::Duration;
 use url::{Position, Url};
 
-use crate::load_credential;
+use crate::wallet::generate_credential;
 
 pub async fn initiate_oid4vci(base_url: Url) -> Result<()> {
     println!("Loading mDL and key...");
-    let loaded = load_credential().await?;
+    let wallet = generate_credential();
 
     let issuer_metadata = IssuerMetadata::discover_async(
         IssuerUrl::new(base_url.to_string()).unwrap(),
@@ -96,7 +96,7 @@ pub async fn initiate_oid4vci(base_url: Url) -> Result<()> {
         .await
         .context("Token exchange failed")?;
 
-    let jwk = JWK::from(Params::EC(ECParams::try_from(&loaded.key).unwrap()));
+    let jwk = JWK::from(Params::EC(ECParams::try_from(&wallet.key).unwrap()));
     let did_key = DID_METHODS.get("key").unwrap();
     let did = did_key.generate(&Source::Key(&jwk)).unwrap();
     let vm = did_key

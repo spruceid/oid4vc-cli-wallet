@@ -1,26 +1,26 @@
-# VP-Interop CLI Wallet
+# OpenID4CI CLI Wallet
 
-CLI-based wallet used for testing with https://github.com/spruceid/vp_interop.
+Rust-based CLI wallet used for testing the OpenID4CI protocols.
 
 ## Usage
 
 ```
+Usage: openid4ci-wallet <COMMAND>
+
 Commands:
-  get-mdl         Generate a fresh mDL using the mdl-sideloader
-  handle-request  Handle a request of the "openid4vp://?request_uri=..." and generate a response
-  help            Print this message or the help of the given subcommand(s)
+  handle-request     Handle a request of the "openid4vp://?request_uri=..." and generate a response
+  initiate-issuance  Initiate a OID4VCI flow
+  help               Print this message or the help of the given subcommand(s)
 
 Options:
   -h, --help  Print help
 ```
 
 ```bash
-# To generate an mDL.
-cargo run -- get-mdl
-
-# To generate an mDL.
-cargo run -- handle-request -r 'openid4vp://?request_uri=...'
-
-# To view help.
+# To run without installing:
 cargo run -- help
+
+# Or to install and then run
+cargo install --path .
+openid4ci-wallet help
 ```
