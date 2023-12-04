@@ -1,4 +1,5 @@
 mod oid4vci;
+mod wallet;
 
 use anyhow::{bail, Context, Result};
 use base64::prelude::*;
@@ -7,10 +8,7 @@ use didkit::ssi::{self, jwk::JWK};
 use isomdl180137::{
     isomdl::{
         definitions::helpers::NonEmptyMap,
-        presentation::{
-            device::{Document, PreparedDeviceResponse},
-            Stringify,
-        },
+        presentation::device::{Document, PreparedDeviceResponse},
     },
     present::{
         complete_mdl_response, OID4VPHandover, State, UnattendedSessionManager,
@@ -30,20 +28,12 @@ use p256::{
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
 use serde_json::{Map, Value};
-use tokio::{
-    fs::{create_dir, read_to_string, remove_dir_all, try_exists, File},
-    io::AsyncWriteExt,
-};
 use url::Url;
 use x509_cert::{
     der::{referenced::OwnedToRef, Decode},
     ext::pkix::{name::GeneralName, SubjectAltName},
     Certificate,
 };
-
-const DIR: &str = "/tmp/vp-interop-cli-wallet";
-const KEYFILE: &str = "/key.pem";
-const MDLFILE: &str = "/mdl";
 
 fn reqwest_client() -> Result<Client> {
     reqwest::Client::builder()
@@ -60,8 +50,6 @@ struct Args {
 
 #[derive(clap::Subcommand)]
 enum Action {
-    /// Generate a fresh mDL using the mdl-sideloader.
-    GetMdl,
     /// Handle a request of the "openid4vp://?request_uri=..." and generate a response.
     HandleRequest {
         /// URL with protocol-specific scheme.
@@ -77,7 +65,6 @@ enum Action {
 #[tokio::main(flavor = "current_thread")]
 async fn main() {
     match Args::parse().action {
-        Action::GetMdl => get_mdl().await,
         Action::HandleRequest { url } => {
             if let Err(e) = handle_request(url).await {
                 println!("ERROR: {e:?}")
@@ -97,80 +84,10 @@ struct SideloaderResponse {
     _other: Value,
 }
 
-async fn get_mdl() {
-    const DIR: &str = "/tmp/vp-interop-cli-wallet";
-    println!("clearing out old data...");
-
-    if let Ok(true) = try_exists(DIR).await {
-        remove_dir_all(DIR)
-            .await
-            .expect("unable to clear out old data");
-    }
-
-    create_dir(DIR).await.expect("unable to create dir");
-
-    println!("generating new key...");
-    let key = p256::SecretKey::random(&mut rand::thread_rng());
-
-    let jwk = key.public_key().to_jwk();
-
-    println!("requesting new mDL...");
-    let response: SideloaderResponse = reqwest::Client::new()
-        .post("https://mdlsideloader.spruceid.xyz/issue")
-        .bearer_auth("ca3c118a254ad07c1e216992eaaab5ae5fe89aff50b905dece3adc06a608ae3c")
-        .json(&jwk)
-        .send()
-        .await
-        .expect("error making request to mdl-sideloader")
-        .json()
-        .await
-        .expect("error parsing response from mdl-sideloader");
-
-    println!("validating response...");
-    Document::parse(response.mso_mdoc.clone()).expect("mdl could not be parsed from response");
-
-    println!("saving key and mDL...");
-    let pem = key
-        .to_sec1_pem(Default::default())
-        .expect("unable to serialize key to pem");
-
-    File::create(DIR.to_string() + KEYFILE)
-        .await
-        .expect("unable to create pem file")
-        .write_all(pem.as_bytes())
-        .await
-        .expect("unable to write key to file");
-
-    File::create(DIR.to_string() + MDLFILE)
-        .await
-        .expect("unable to create mdl file")
-        .write_all(response.mso_mdoc.as_bytes())
-        .await
-        .expect("unable to write mdl to file");
-
-    println!("DONE!")
-}
-
-struct Loaded {
+struct Wallet {
     key: SecretKey,
     mdl: Document,
 }
-
-async fn load_credential() -> Result<Loaded> {
-    let key_pem = read_to_string(DIR.to_string() + KEYFILE)
-        .await
-        .context("unable to load keyfile")?;
-    let key = SecretKey::from_sec1_pem(&key_pem)
-        .context("unable to parse keyfile as a p256 secret key")?;
-
-    let mdl_string = read_to_string(DIR.to_string() + MDLFILE)
-        .await
-        .context("unable to load mdlfile")?;
-    let mdl = Document::parse(mdl_string).context("unable to parse mdlfile")?;
-
-    Ok(Loaded { key, mdl })
-}
-
 struct AuthorizationRequest {
     request_uri: Url,
     client_id: Option<String>,
@@ -268,9 +185,7 @@ fn validate_cis_x509_san_dns(client_id: &str, jwt: &str) -> Result<()> {
         {
             bail!("subject CN did not match client id")
         }
-    }
-
-    if !leaf_cert
+    } else if !leaf_cert
         .tbs_certificate
         .filter::<SubjectAltName>()
         .filter_map(|r| match r {
@@ -290,7 +205,7 @@ fn validate_cis_x509_san_dns(client_id: &str, jwt: &str) -> Result<()> {
         })
         .any(|uri| uri == client_id)
     {
-        println!("'client_id' does not match any SubjectAlternativeName in leaf certificate");
+        bail!("'client_id' does not match any SubjectAlternativeName in leaf certificate");
     }
 
     let pk: p256::PublicKey = leaf_cert
@@ -492,8 +407,8 @@ async fn send(response_uri: String, jwe: String) -> Result<String> {
 }
 
 async fn handle_request(request: Url) -> Result<()> {
-    println!("loading mDL and key...");
-    let loaded = load_credential().await?;
+    println!("generating mDL and key...");
+    let wallet = wallet::generate_credential();
 
     println!("validating authorization request...");
     let authz_req = validate_authz_request(request)?;
@@ -506,13 +421,13 @@ async fn handle_request(request: Url) -> Result<()> {
         .response_uri
         .clone()
         .context("response_uri missing from request")?;
-    let (session_manager, state) = parse_request(request.clone(), authz_req.client_id, loaded.mdl)?;
+    let (session_manager, state) = parse_request(request.clone(), authz_req.client_id, wallet.mdl)?;
 
     println!("preparing response...");
     let prepared_response = prepare_response(&session_manager, request).await?;
 
     println!("signing and encrypting response...");
-    let jwe = finish(loaded.key, prepared_response, state).await?;
+    let jwe = finish(wallet.key, prepared_response, state).await?;
 
     println!("POSTing response to {response_uri}...");
     let redirect = send(response_uri, jwe).await?;
