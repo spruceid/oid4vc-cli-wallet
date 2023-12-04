@@ -1,5 +1,5 @@
 [package]
-name = "openid4ci-wallet"
+name = "openid4vc-wallet"
 version = "0.1.0"
 edition = "2021"
 
