@@ -25,3 +25,4 @@ time = "0.3.25"
 tokio = { version = "1.32.0", features = ["macros", "rt", "fs", "io-util"] }
 url = "2.4.0"
 x509-cert = "0.2.4"
+sec1 = "0.7.3"

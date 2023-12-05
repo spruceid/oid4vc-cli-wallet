@@ -1,4 +1,6 @@
 mod oid4vci;
+#[cfg(test)]
+mod tests;
 mod wallet;
 
 use anyhow::{bail, Context, Result};

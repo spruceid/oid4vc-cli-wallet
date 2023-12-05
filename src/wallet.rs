@@ -10,8 +10,8 @@ use isomdl180137::isomdl::{
 use p256::{
     ecdsa::{Signature, SigningKey},
     elliptic_curve::sec1::ToEncodedPoint,
-    pkcs8::DecodePrivateKey,
 };
+use sec1::DecodeEcPrivateKey;
 use serde_json::json;
 use time::OffsetDateTime;
 
@@ -69,7 +69,7 @@ struct Issuer {
 
 fn issuer() -> Issuer {
     let signer_pem = include_str!("../test/signer-key.pem");
-    let signer = SigningKey::from_pkcs8_pem(signer_pem).unwrap();
+    let signer = SigningKey::from_sec1_pem(signer_pem).unwrap();
 
     let signer_cert_pem = include_bytes!("../test/signer-cert.pem");
     let x5chain = X5Chain::builder()

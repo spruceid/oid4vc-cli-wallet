@@ -3422,7 +3422,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "openid4ci-wallet"
+name = "openid4vc-wallet"
 version = "0.1.0"
 dependencies = [
  "anyhow",
@@ -3438,6 +3438,7 @@ dependencies = [
  "p256 0.13.2",
  "rand",
  "reqwest",
+ "sec1 0.7.3",
  "serde",
  "serde_json",
  "time",
