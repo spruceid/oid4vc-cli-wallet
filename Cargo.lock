@@ -870,20 +870,6 @@ dependencies = [
 [[package]]
 name = "cose-rs"
 version = "0.1.0"
-source = "git+ssh://git@github.com/spruceid/cose-rs.git?rev=4104505#4104505ec2c9bddd17d8b173f96ecd027c13ab9d"
-dependencies = [
- "p256 0.13.2",
- "p384",
- "serde",
- "serde_bytes",
- "serde_cbor",
- "signature 2.1.0",
- "thiserror",
-]
-
-[[package]]
-name = "cose-rs"
-version = "0.1.0"
 source = "git+https://github.com/spruceid/cose-rs?rev=4104505#4104505ec2c9bddd17d8b173f96ecd027c13ab9d"
 dependencies = [
  "p256 0.13.2",
@@ -2379,6 +2365,41 @@ dependencies = [
 [[package]]
 name = "isomdl"
 version = "0.1.0"
+source = "git+https://github.com/spruceid/isomdl?rev=485de1d#485de1dada89f1c4766b40960e81f33270db0b18"
+dependencies = [
+ "aes",
+ "aes-gcm",
+ "anyhow",
+ "async-signature",
+ "base64 0.13.1",
+ "cose-rs",
+ "ecdsa 0.16.8",
+ "elliptic-curve 0.13.6",
+ "hex-literal",
+ "hkdf",
+ "hmac",
+ "isomdl-macros 0.1.0 (git+https://github.com/spruceid/isomdl?rev=485de1d)",
+ "p256 0.13.2",
+ "p384",
+ "pem-rfc7468 0.7.0",
+ "rand",
+ "sec1 0.7.3",
+ "serde",
+ "serde_cbor",
+ "serde_json",
+ "sha2 0.10.8",
+ "signature 2.1.0",
+ "ssi-jwk",
+ "thiserror",
+ "time",
+ "uuid",
+ "x509-cert 0.1.1",
+ "zeroize",
+]
+
+[[package]]
+name = "isomdl"
+version = "0.1.0"
 source = "git+https://github.com/spruceid/isomdl?rev=90ce218#90ce2180a7336715ff4682dcab9bb7cfad898740"
 dependencies = [
  "aes",
@@ -2386,7 +2407,7 @@ dependencies = [
  "anyhow",
  "async-signature",
  "base64 0.13.1",
- "cose-rs 0.1.0 (git+https://github.com/spruceid/cose-rs?rev=4104505)",
+ "cose-rs",
  "ecdsa 0.16.8",
  "elliptic-curve 0.13.6",
  "hex-literal",
@@ -2412,38 +2433,13 @@ dependencies = [
 ]
 
 [[package]]
-name = "isomdl"
+name = "isomdl-macros"
 version = "0.1.0"
-source = "git+ssh://git@github.com/spruceid/isomdl.git?rev=b2324b7#b2324b741456ff6b4956fca54a7fc511245952d0"
+source = "git+https://github.com/spruceid/isomdl?rev=485de1d#485de1dada89f1c4766b40960e81f33270db0b18"
 dependencies = [
- "aes",
- "aes-gcm",
- "anyhow",
- "async-signature",
- "base64 0.13.1",
- "cose-rs 0.1.0 (git+ssh://git@github.com/spruceid/cose-rs.git?rev=4104505)",
- "ecdsa 0.16.8",
- "elliptic-curve 0.13.6",
- "hex-literal",
- "hkdf",
- "hmac",
- "isomdl-macros 0.1.0 (git+ssh://git@github.com/spruceid/isomdl.git?rev=b2324b7)",
- "p256 0.13.2",
- "p384",
- "pem-rfc7468 0.7.0",
- "rand",
- "sec1 0.7.3",
- "serde",
- "serde_cbor",
- "serde_json",
- "sha2 0.10.8",
- "signature 2.1.0",
- "ssi-jwk",
- "thiserror",
- "time",
- "uuid",
- "x509-cert 0.1.1",
- "zeroize",
+ "proc-macro2",
+ "quote",
+ "syn 1.0.109",
 ]
 
 [[package]]
@@ -2457,19 +2453,9 @@ dependencies = [
 ]
 
 [[package]]
-name = "isomdl-macros"
-version = "0.1.0"
-source = "git+ssh://git@github.com/spruceid/isomdl.git?rev=b2324b7#b2324b741456ff6b4956fca54a7fc511245952d0"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn 1.0.109",
-]
-
-[[package]]
 name = "isomdl180137"
 version = "0.1.0"
-source = "git+https://github.com/spruceid/isomdl-18013-7?rev=7ee8bdb#7ee8bdb432db5e204c902e3708d07250f3e35ed1"
+source = "git+https://github.com/spruceid/isomdl-18013-7?rev=a631543#a6315434d55ecbc29e410e0862c8c07a32d59897"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -2477,14 +2463,14 @@ dependencies = [
  "base64url",
  "chrono",
  "const-oid 0.9.5",
- "cose-rs 0.1.0 (git+ssh://git@github.com/spruceid/cose-rs.git?rev=4104505)",
+ "cose-rs",
  "did-ion",
  "did-jwk",
  "did-web",
  "elliptic-curve 0.13.6",
- "isomdl 0.1.0 (git+ssh://git@github.com/spruceid/isomdl.git?rev=b2324b7)",
+ "isomdl 0.1.0 (git+https://github.com/spruceid/isomdl?rev=485de1d)",
  "josekit 0.8.3",
- "oidc4vp 0.1.0 (git+https://github.com/spruceid/oidc4vp-rs.git?rev=f9557eb)",
+ "oidc4vp 0.1.0 (git+https://github.com/spruceid/oidc4vp-rs.git?rev=22ddab2)",
  "openidconnect 3.3.1 (git+https://github.com/ramosbugs/openidconnect-rs?branch=main)",
  "p256 0.13.2",
  "rand",
@@ -3364,27 +3350,13 @@ dependencies = [
 [[package]]
 name = "oidc4vp"
 version = "0.1.0"
-source = "git+https://github.com/spruceid/oidc4vp-rs?rev=dd06e4e#dd06e4eb216328cb659773d066983622671584f0"
-dependencies = [
- "jsonpath-rust",
- "lazy_static",
- "serde",
- "serde_json",
- "ssi 0.6.0",
- "thiserror",
- "uuid",
-]
-
-[[package]]
-name = "oidc4vp"
-version = "0.1.0"
-source = "git+https://github.com/spruceid/oidc4vp-rs.git?rev=f9557eb#f9557eb8e779a7aab07b2682a4a518f3aeda9e3c"
+source = "git+https://github.com/spruceid/oidc4vp-rs.git?rev=22ddab2#22ddab2db59d9806035125c163d0309d927e0a9b"
 dependencies = [
  "anyhow",
  "async-trait",
  "base64 0.13.1",
  "base64url",
- "isomdl 0.1.0 (git+ssh://git@github.com/spruceid/isomdl.git?rev=b2324b7)",
+ "isomdl 0.1.0 (git+https://github.com/spruceid/isomdl?rev=485de1d)",
  "josekit 0.8.3",
  "jsonpath-rust",
  "lazy_static",
@@ -3400,6 +3372,20 @@ dependencies = [
  "url",
  "uuid",
  "x509-cert 0.2.4",
+]
+
+[[package]]
+name = "oidc4vp"
+version = "0.1.0"
+source = "git+https://github.com/spruceid/oidc4vp-rs?rev=dd06e4e#dd06e4eb216328cb659773d066983622671584f0"
+dependencies = [
+ "jsonpath-rust",
+ "lazy_static",
+ "serde",
+ "serde_json",
+ "ssi 0.6.0",
+ "thiserror",
+ "uuid",
 ]
 
 [[package]]
@@ -3443,7 +3429,7 @@ dependencies = [
  "isomdl180137",
  "josekit 0.8.3",
  "oid4vci",
- "oidc4vp 0.1.0 (git+https://github.com/spruceid/oidc4vp-rs.git?rev=f9557eb)",
+ "oidc4vp 0.1.0 (git+https://github.com/spruceid/oidc4vp-rs.git?rev=22ddab2)",
  "open",
  "p256 0.13.2",
  "rand",

@@ -13,9 +13,9 @@ repository = "https://github.com/spruceid/oid4vc_cli_wallet"
 anyhow = "1.0.75"
 base64 = "0.21.2"
 clap = { version = "4.3.21", features = ["derive"] }
-isomdl180137 = { git = "https://github.com/spruceid/isomdl-18013-7", rev = "7ee8bdb" }
+isomdl180137 = { git = "https://github.com/spruceid/isomdl-18013-7", rev = "a631543" }
 josekit = { git = "https://github.com/cobward/josekit-rs", rev = "635c8a7" }
-oidc4vp = { git = "https://github.com/spruceid/oidc4vp-rs.git", rev = "f9557eb" }
+oidc4vp = { git = "https://github.com/spruceid/oidc4vp-rs.git", rev = "22ddab2" }
 oid4vci = { git = "https://github.com/spruceid/oid4vci-rs.git", rev = "612ea3b" }
 inquire = "0.6.2"
 open = "5.0.0"
