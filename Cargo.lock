@@ -870,20 +870,6 @@ dependencies = [
 [[package]]
 name = "cose-rs"
 version = "0.1.0"
-source = "git+ssh://git@github.com/spruceid/cose-rs.git?rev=4104505#4104505ec2c9bddd17d8b173f96ecd027c13ab9d"
-dependencies = [
- "p256 0.13.2",
- "p384",
- "serde",
- "serde_bytes",
- "serde_cbor",
- "signature 2.1.0",
- "thiserror",
-]
-
-[[package]]
-name = "cose-rs"
-version = "0.1.0"
 source = "git+https://github.com/spruceid/cose-rs?rev=4104505#4104505ec2c9bddd17d8b173f96ecd027c13ab9d"
 dependencies = [
  "p256 0.13.2",
@@ -2379,6 +2365,41 @@ dependencies = [
 [[package]]
 name = "isomdl"
 version = "0.1.0"
+source = "git+https://github.com/spruceid/isomdl?rev=485de1d#485de1dada89f1c4766b40960e81f33270db0b18"
+dependencies = [
+ "aes",
+ "aes-gcm",
+ "anyhow",
+ "async-signature",
+ "base64 0.13.1",
+ "cose-rs",
+ "ecdsa 0.16.8",
+ "elliptic-curve 0.13.6",
+ "hex-literal",
+ "hkdf",
+ "hmac",
+ "isomdl-macros 0.1.0 (git+https://github.com/spruceid/isomdl?rev=485de1d)",
+ "p256 0.13.2",
+ "p384",
+ "pem-rfc7468 0.7.0",
+ "rand",
+ "sec1 0.7.3",
+ "serde",
+ "serde_cbor",
+ "serde_json",
+ "sha2 0.10.8",
+ "signature 2.1.0",
+ "ssi-jwk",
+ "thiserror",
+ "time",
+ "uuid",
+ "x509-cert 0.1.1",
+ "zeroize",
+]
+
+[[package]]
+name = "isomdl"
+version = "0.1.0"
 source = "git+https://github.com/spruceid/isomdl?rev=90ce218#90ce2180a7336715ff4682dcab9bb7cfad898740"
 dependencies = [
  "aes",
@@ -2386,7 +2407,7 @@ dependencies = [
  "anyhow",
  "async-signature",
  "base64 0.13.1",
- "cose-rs 0.1.0 (git+https://github.com/spruceid/cose-rs?rev=4104505)",
+ "cose-rs",
  "ecdsa 0.16.8",
  "elliptic-curve 0.13.6",
  "hex-literal",
@@ -2412,38 +2433,13 @@ dependencies = [
 ]
 
 [[package]]
-name = "isomdl"
+name = "isomdl-macros"
 version = "0.1.0"
-source = "git+ssh://git@github.com/spruceid/isomdl.git?rev=b2324b7#b2324b741456ff6b4956fca54a7fc511245952d0"
+source = "git+https://github.com/spruceid/isomdl?rev=485de1d#485de1dada89f1c4766b40960e81f33270db0b18"
 dependencies = [
- "aes",
- "aes-gcm",
- "anyhow",
- "async-signature",
- "base64 0.13.1",
- "cose-rs 0.1.0 (git+ssh://git@github.com/spruceid/cose-rs.git?rev=4104505)",
- "ecdsa 0.16.8",
- "elliptic-curve 0.13.6",
- "hex-literal",
- "hkdf",
- "hmac",
- "isomdl-macros 0.1.0 (git+ssh://git@github.com/spruceid/isomdl.git?rev=b2324b7)",
- "p256 0.13.2",
- "p384",
- "pem-rfc7468 0.7.0",
- "rand",
- "sec1 0.7.3",
- "serde",
- "serde_cbor",
- "serde_json",
- "sha2 0.10.8",
- "signature 2.1.0",
- "ssi-jwk",
- "thiserror",
- "time",
- "uuid",
- "x509-cert 0.1.1",
- "zeroize",
+ "proc-macro2",
+ "quote",
+ "syn 1.0.109",
 ]
 
 [[package]]
@@ -2457,19 +2453,9 @@ dependencies = [
 ]
 
 [[package]]
-name = "isomdl-macros"
-version = "0.1.0"
-source = "git+ssh://git@github.com/spruceid/isomdl.git?rev=b2324b7#b2324b741456ff6b4956fca54a7fc511245952d0"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn 1.0.109",
-]
-
-[[package]]
 name = "isomdl180137"
 version = "0.1.0"
-source = "git+https://github.com/spruceid/isomdl-18013-7?rev=7ee8bdb#7ee8bdb432db5e204c902e3708d07250f3e35ed1"
+source = "git+https://github.com/spruceid/isomdl-18013-7?rev=a631543#a6315434d55ecbc29e410e0862c8c07a32d59897"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -2477,14 +2463,14 @@ dependencies = [
  "base64url",
  "chrono",
  "const-oid 0.9.5",
- "cose-rs 0.1.0 (git+ssh://git@github.com/spruceid/cose-rs.git?rev=4104505)",
+ "cose-rs",
  "did-ion",
  "did-jwk",
  "did-web",
  "elliptic-curve 0.13.6",
- "isomdl 0.1.0 (git+ssh://git@github.com/spruceid/isomdl.git?rev=b2324b7)",
+ "isomdl 0.1.0 (git+https://github.com/spruceid/isomdl?rev=485de1d)",
  "josekit 0.8.3",
- "oidc4vp 0.1.0 (git+https://github.com/spruceid/oidc4vp-rs.git?rev=f9557eb)",
+ "oidc4vp 0.1.0 (git+https://github.com/spruceid/oidc4vp-rs.git?rev=22ddab2)",
  "openidconnect 3.3.1 (git+https://github.com/ramosbugs/openidconnect-rs?branch=main)",
  "p256 0.13.2",
  "rand",
@@ -3210,6 +3196,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "nu-ansi-term"
+version = "0.46.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "77a8165726e8236064dbb45459242600304b42a5ea24ee2948e18e023bf7ba84"
+dependencies = [
+ "overload",
+ "winapi",
+]
+
+[[package]]
 name = "num-bigint"
 version = "0.4.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3354,27 +3350,13 @@ dependencies = [
 [[package]]
 name = "oidc4vp"
 version = "0.1.0"
-source = "git+https://github.com/spruceid/oidc4vp-rs?rev=dd06e4e#dd06e4eb216328cb659773d066983622671584f0"
-dependencies = [
- "jsonpath-rust",
- "lazy_static",
- "serde",
- "serde_json",
- "ssi 0.6.0",
- "thiserror",
- "uuid",
-]
-
-[[package]]
-name = "oidc4vp"
-version = "0.1.0"
-source = "git+https://github.com/spruceid/oidc4vp-rs.git?rev=f9557eb#f9557eb8e779a7aab07b2682a4a518f3aeda9e3c"
+source = "git+https://github.com/spruceid/oidc4vp-rs.git?rev=22ddab2#22ddab2db59d9806035125c163d0309d927e0a9b"
 dependencies = [
  "anyhow",
  "async-trait",
  "base64 0.13.1",
  "base64url",
- "isomdl 0.1.0 (git+ssh://git@github.com/spruceid/isomdl.git?rev=b2324b7)",
+ "isomdl 0.1.0 (git+https://github.com/spruceid/isomdl?rev=485de1d)",
  "josekit 0.8.3",
  "jsonpath-rust",
  "lazy_static",
@@ -3390,6 +3372,20 @@ dependencies = [
  "url",
  "uuid",
  "x509-cert 0.2.4",
+]
+
+[[package]]
+name = "oidc4vp"
+version = "0.1.0"
+source = "git+https://github.com/spruceid/oidc4vp-rs?rev=dd06e4e#dd06e4eb216328cb659773d066983622671584f0"
+dependencies = [
+ "jsonpath-rust",
+ "lazy_static",
+ "serde",
+ "serde_json",
+ "ssi 0.6.0",
+ "thiserror",
+ "uuid",
 ]
 
 [[package]]
@@ -3433,7 +3429,7 @@ dependencies = [
  "isomdl180137",
  "josekit 0.8.3",
  "oid4vci",
- "oidc4vp 0.1.0 (git+https://github.com/spruceid/oidc4vp-rs.git?rev=f9557eb)",
+ "oidc4vp 0.1.0 (git+https://github.com/spruceid/oidc4vp-rs.git?rev=22ddab2)",
  "open",
  "p256 0.13.2",
  "rand",
@@ -3443,6 +3439,8 @@ dependencies = [
  "serde_json",
  "time",
  "tokio",
+ "tracing",
+ "tracing-subscriber",
  "url",
  "x509-cert 0.2.4",
 ]
@@ -3570,6 +3568,12 @@ checksum = "68f19d67e5a2795c94e73e0bb1cc1a7edeb2e28efd39e2e1c9b7a40c1108b11c"
 dependencies = [
  "num-traits",
 ]
+
+[[package]]
+name = "overload"
+version = "0.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b15813163c1d831bf4a13c3610c05c0d03b39feb07f7e09fa234dac9b15aaf39"
 
 [[package]]
 name = "p256"
@@ -4678,6 +4682,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "sharded-slab"
+version = "0.1.7"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f40ca3c46823713e0d4209592e8d6e826aa57e928f09752619fc696c499637f6"
+dependencies = [
+ "lazy_static",
+]
+
+[[package]]
 name = "signal-hook"
 version = "0.3.17"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -5396,6 +5409,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "thread_local"
+version = "1.1.7"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3fdd6f064ccff2d6567adcb3873ca630700f00b5ad3f060c25b5dcfd9a4ce152"
+dependencies = [
+ "cfg-if",
+ "once_cell",
+]
+
+[[package]]
 name = "time"
 version = "0.3.29"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -5538,11 +5561,10 @@ checksum = "b6bc1c9ce2b5135ac7f93c72918fc37feb872bdc6a5533a8b85eb4b86bfdae52"
 
 [[package]]
 name = "tracing"
-version = "0.1.37"
+version = "0.1.40"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8ce8c33a8d48bd45d624a6e523445fd21ec13d3653cd51f681abf67418f54eb8"
+checksum = "c3523ab5a71916ccf420eebdf5521fcef02141234bbc0b8a49f2fdc4544364ef"
 dependencies = [
- "cfg-if",
  "pin-project-lite",
  "tracing-attributes",
  "tracing-core",
@@ -5550,9 +5572,9 @@ dependencies = [
 
 [[package]]
 name = "tracing-attributes"
-version = "0.1.26"
+version = "0.1.27"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5f4f31f56159e98206da9efd823404b79b6ef3143b4a7ab76e67b1751b25a4ab"
+checksum = "34704c8d6ebcbc939824180af020566b01a7c01f80641264eba0999f6c2b6be7"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -5561,11 +5583,37 @@ dependencies = [
 
 [[package]]
 name = "tracing-core"
-version = "0.1.31"
+version = "0.1.32"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0955b8137a1df6f1a2e9a37d8a6656291ff0297c1a97c24e0d8425fe2312f79a"
+checksum = "c06d3da6113f116aaee68e4d601191614c9053067f9ab7f6edbcb161237daa54"
 dependencies = [
  "once_cell",
+ "valuable",
+]
+
+[[package]]
+name = "tracing-log"
+version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ee855f1f400bd0e5c02d150ae5de3840039a3f54b025156404e34c23c03f47c3"
+dependencies = [
+ "log",
+ "once_cell",
+ "tracing-core",
+]
+
+[[package]]
+name = "tracing-subscriber"
+version = "0.3.18"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ad0f048c97dbd9faa9b7df56362b8ebcaa52adb06b498c050d2f4e32f90a7a8b"
+dependencies = [
+ "nu-ansi-term",
+ "sharded-slab",
+ "smallvec",
+ "thread_local",
+ "tracing-core",
+ "tracing-log",
 ]
 
 [[package]]
@@ -5712,6 +5760,12 @@ dependencies = [
  "serde",
  "wasm-bindgen",
 ]
+
+[[package]]
+name = "valuable"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "830b7e5d4d90034032940e4ace0d9a9a057e7a45cd94e6c007832e39edb82f6d"
 
 [[package]]
 name = "value-bag"

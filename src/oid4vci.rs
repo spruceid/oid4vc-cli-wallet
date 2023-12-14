@@ -23,12 +23,13 @@ use oid4vci::{
     },
 };
 use time::Duration;
+use tracing::info;
 use url::{Position, Url};
 
 use crate::wallet::generate_credential;
 
 pub async fn initiate_oid4vci(base_url: Url) -> Result<()> {
-    println!("Loading mDL and key...");
+    info!("Loading mDL and key...");
     let wallet = generate_credential();
 
     let issuer_metadata = IssuerMetadata::discover_async(
@@ -63,7 +64,7 @@ pub async fn initiate_oid4vci(base_url: Url) -> Result<()> {
     .context("Error getting confirmation")?;
 
     match redirect_confirm {
-        true => println!("Opening in the browser..."),
+        true => info!("Opening in the browser..."),
         false => bail!("Aborting."),
     }
 
@@ -121,7 +122,7 @@ pub async fn initiate_oid4vci(base_url: Url) -> Result<()> {
     let credential_response = client
         .request_credential(
             token_response.access_token().clone(),
-            issuer_metadata.credentials_supported()[1]
+            issuer_metadata.credentials_supported()[0]
                 .additional_fields()
                 .to_request(),
         )
@@ -159,7 +160,7 @@ pub async fn initiate_oid4vci(base_url: Url) -> Result<()> {
     if !res.errors.is_empty() {
         bail!("Error verifying credential: {:?}", res.errors);
     }
-    println!(
+    info!(
         "{}",
         serde_json::to_string_pretty(&credential_response).unwrap()
     );
