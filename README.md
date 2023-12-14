@@ -8,9 +8,9 @@ Rust-based CLI wallet used for testing the OpenID4VC protocols.
 Usage: openid4vc-wallet <COMMAND>
 
 Commands:
-  handle-request     Handle a request of the format "openid4vp://?request_uri=..." and generate a response
-  initiate-issuance  Initiate a OID4VCI flow
-  help               Print this message or the help of the given subcommand(s)
+  handle-mdoc-request  Handle a request of the "mdoc-openid4vp://?request_uri=..." and generate a response
+  initiate-issuance    Initiate a OID4VCI flow
+  help                 Print this message or the help of the given subcommand(s)
 
 Options:
   -h, --help  Print help

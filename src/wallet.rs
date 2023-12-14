@@ -1,3 +1,5 @@
+use std::time::Duration;
+
 use crate::Wallet;
 use isomdl180137::isomdl::{
     definitions::{
@@ -28,7 +30,7 @@ pub(crate) fn generate_credential() -> Wallet {
     let validity_info = ValidityInfo {
         signed: OffsetDateTime::now_utc(),
         valid_from: OffsetDateTime::now_utc(),
-        valid_until: OffsetDateTime::now_utc(),
+        valid_until: OffsetDateTime::now_utc() + Duration::from_secs(60),
         expected_update: None,
     };
 
