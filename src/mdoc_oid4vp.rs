@@ -1,6 +1,5 @@
 use anyhow::{bail, Context, Result};
 use base64::prelude::*;
-use didkit::ssi::{self, jwk::JWK};
 use isomdl180137::{
     isomdl::{
         definitions::helpers::NonEmptyMap,
@@ -23,6 +22,7 @@ use p256::{
 use reqwest::Client;
 use serde::Deserialize;
 use serde_json::{Map, Value};
+use ssi_jwk::JWK;
 use tracing::{info, warn};
 use url::Url;
 use x509_cert::{
@@ -135,7 +135,8 @@ fn validate_cis_request_uri(request: &RequestObject) -> Result<()> {
 
 fn validate_cis_x509_san_uri(client_id: &str, jwt: &str) -> Result<()> {
     info!("client_id: {:?}", client_id);
-    let (headers, _, _) = ssi::jws::split_jws(jwt).context("failed to split jwt into parts")?;
+    let (headers, _, _) =
+        ssi_claims::jws::split_jws(jwt).context("failed to split jwt into parts")?;
 
     let headers_json_bytes = BASE64_URL_SAFE_NO_PAD
         .decode(headers)
@@ -149,7 +150,7 @@ fn validate_cis_x509_san_uri(client_id: &str, jwt: &str) -> Result<()> {
         bail!("'x5c' header was not an array")
     };
 
-    let Value::String(b64_x509) = x5chain.get(0).context("'x5c' was an empty array")? else {
+    let Value::String(b64_x509) = x5chain.first().context("'x5c' was an empty array")? else {
         bail!("'x5c' header was not an array of strings");
     };
 
@@ -205,15 +206,16 @@ fn validate_cis_x509_san_uri(client_id: &str, jwt: &str) -> Result<()> {
 
     let jwk: JWK = serde_json::from_str(&pk.to_jwk_string()).context("unable to parse JWK")?;
 
-    let _: RequestObject =
-        ssi::jwt::decode_verify(jwt, &jwk).context("unable to verify request JWT signature")?;
+    let _ = ssi_claims::jws::decode_verify(jwt, &jwk)
+        .context("unable to verify request JWT signature")?;
 
     Ok(())
 }
 
 fn validate_cis_x509_san_dns(client_id: &str, jwt: &str) -> Result<()> {
     info!("client_id: {:?}", client_id);
-    let (headers, _, _) = ssi::jws::split_jws(jwt).context("failed to split jwt into parts")?;
+    let (headers, _, _) =
+        ssi_claims::jws::split_jws(jwt).context("failed to split jwt into parts")?;
 
     let headers_json_bytes = BASE64_URL_SAFE_NO_PAD
         .decode(headers)
@@ -227,7 +229,7 @@ fn validate_cis_x509_san_dns(client_id: &str, jwt: &str) -> Result<()> {
         bail!("'x5c' header was not an array")
     };
 
-    let Value::String(b64_x509) = x5chain.get(0).context("'x5c' was an empty array")? else {
+    let Value::String(b64_x509) = x5chain.first().context("'x5c' was an empty array")? else {
         bail!("'x5c' header was not an array of strings");
     };
 
@@ -283,8 +285,8 @@ fn validate_cis_x509_san_dns(client_id: &str, jwt: &str) -> Result<()> {
 
     let jwk: JWK = serde_json::from_str(&pk.to_jwk_string()).context("unable to parse JWK")?;
 
-    let _: RequestObject =
-        ssi::jwt::decode_verify(jwt, &jwk).context("unable to verify request JWT signature")?;
+    let _ = ssi_claims::jws::decode_verify(jwt, &jwk)
+        .context("unable to verify request JWT signature")?;
 
     Ok(())
 }
@@ -309,8 +311,14 @@ async fn get_request_object(request_uri: Url) -> Result<RequestObject> {
         bail!("'{status}' error GETing '{request_uri}': {body}")
     }
 
-    let request: RequestObject =
-        ssi::jwt::decode_unverified(&body).context("unable to decode JWT")?;
+    let request = serde_json::from_slice(
+        ssi_claims::jws::decode_unverified(&body)
+            .context("unable to decode JWT")?
+            .1
+            .as_slice(),
+    )
+    .context("unable to parse JWT into RequestObject")?;
+
     validate_response_mode(&request)?;
     let client_id_scheme = request
         .client_id_scheme

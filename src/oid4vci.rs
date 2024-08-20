@@ -1,27 +1,30 @@
 use anyhow::{bail, Context, Result};
-use didkit::{
-    ssi::{
-        jwk::{ECParams, Params, JWK},
-        vc::Credential,
-    },
-    ContextLoader, ResolutionInputMetadata, Source, DID_METHODS,
-};
+use did_method_key::DIDKey;
 use inquire::{Confirm, Text};
 use oid4vci::{
-    core::{client::Client, metadata::IssuerMetadata},
-    credential::ResponseEnum,
-    credential_profiles::{
-        CoreProfilesAuthorizationDetails, CoreProfilesResponse, CredentialMetadataProfile,
+    core::{
+        client::Client,
+        metadata::CredentialIssuerMetadata,
+        profiles::{CoreProfilesAuthorizationDetails, CoreProfilesResponse},
     },
+    credential::ResponseEnum,
     metadata::AuthorizationMetadata,
     openidconnect::{
         reqwest::async_http_client, AuthorizationCode, ClientId, CsrfToken, IssuerUrl,
         OAuth2TokenResponse, PkceCodeChallenge, RedirectUrl,
     },
+    profiles::CredentialMetadataProfile,
     proof_of_possession::{
         Proof, ProofOfPossession, ProofOfPossessionController, ProofOfPossessionParams,
     },
 };
+use ssi_claims::{
+    jwt::ToDecodedJWT, vc::v1::data_integrity::any_credential_from_json_str, VerificationParameters,
+};
+use ssi_dids::AnyDidMethod;
+use ssi_dids_core::{DIDResolver, VerificationMethodDIDResolver};
+use ssi_jwk::{ECParams, Params, JWK};
+use ssi_verification_methods::AnyMethod;
 use time::Duration;
 use tracing::info;
 use url::{Position, Url};
@@ -32,14 +35,14 @@ pub async fn initiate_oid4vci(base_url: Url) -> Result<()> {
     info!("Loading mDL and key...");
     let wallet = generate_credential();
 
-    let issuer_metadata = IssuerMetadata::discover_async(
+    let issuer_metadata = CredentialIssuerMetadata::discover_async(
         IssuerUrl::new(base_url.to_string()).unwrap(),
         async_http_client,
     )
     .await
     .context("Issuer metadata discovery failed")?;
     let authorization_metadata =
-        AuthorizationMetadata::discover_async(&issuer_metadata, async_http_client)
+        AuthorizationMetadata::discover_async(&issuer_metadata, None, async_http_client)
             .await
             .context("Authorization server discovery failed")?;
     let client = Client::from_issuer_metadata(
@@ -97,20 +100,21 @@ pub async fn initiate_oid4vci(base_url: Url) -> Result<()> {
         .await
         .context("Token exchange failed")?;
 
-    let jwk = JWK::from(Params::EC(ECParams::try_from(&wallet.key).unwrap()));
-    let did_key = DID_METHODS.get("key").unwrap();
-    let did = did_key.generate(&Source::Key(&jwk)).unwrap();
-    let vm = did_key
-        .to_resolver()
-        .resolve(&did, &ResolutionInputMetadata::default())
+    let jwk = JWK::from(Params::EC(ECParams::from(&wallet.key)));
+
+    let did = DIDKey::generate(&jwk).unwrap();
+
+    let vm_resolver: VerificationMethodDIDResolver<AnyDidMethod, AnyMethod> =
+        AnyDidMethod::default().into_vm_resolver();
+
+    let vm = vm_resolver
+        .resolve(&did)
         .await
-        .1
         .unwrap()
-        .verification_method
-        .unwrap()[0]
-        .get_id(&did)
-        .parse()
-        .unwrap();
+        .document
+        .verification_method[0]
+        .id
+        .clone();
 
     let pop_params = ProofOfPossessionParams {
         audience: base_url,
@@ -122,7 +126,7 @@ pub async fn initiate_oid4vci(base_url: Url) -> Result<()> {
     let credential_response = client
         .request_credential(
             token_response.access_token().clone(),
-            issuer_metadata.credentials_supported()[0]
+            issuer_metadata.credential_configurations_supported()[0]
                 .additional_fields()
                 .to_request(),
         )
@@ -132,33 +136,26 @@ pub async fn initiate_oid4vci(base_url: Url) -> Result<()> {
         .request_async(async_http_client)
         .await
         .context("Credential request failed")?;
+
+    let vm_resolver = AnyDidMethod::default().into_vm_resolver();
+    let params = VerificationParameters::from_resolver(vm_resolver);
+
     let res = match credential_response.additional_profile_fields() {
-        ResponseEnum::Immedate(c) => match c {
-            CoreProfilesResponse::JWTVC(c) => {
-                Credential::verify_jwt(
-                    c.credential(),
-                    None,
-                    DID_METHODS.to_resolver(),
-                    &mut ContextLoader::default(),
-                )
-                .await
-            }
+        ResponseEnum::Immediate(c) => match c {
+            CoreProfilesResponse::JWTVC(c) => c.credential().verify_jwt(&params).await,
             CoreProfilesResponse::JWTLDVC(_) => todo!(),
             CoreProfilesResponse::LDVC(c) => {
-                c.credential()
-                    .verify(
-                        None,
-                        DID_METHODS.to_resolver(),
-                        &mut ContextLoader::default(),
-                    )
+                any_credential_from_json_str(&serde_json::to_string(c.credential()).unwrap())
+                    .unwrap()
+                    .verify(&params)
                     .await
             }
             CoreProfilesResponse::ISOmDL(_) => todo!(),
         },
         ResponseEnum::Deferred { .. } => panic!("Should be immediate"),
     };
-    if !res.errors.is_empty() {
-        bail!("Error verifying credential: {:?}", res.errors);
+    if let Err(err) = res {
+        bail!("Error verifying credential: {:?}", err);
     }
     info!(
         "{}",
