@@ -10,7 +10,7 @@ use oid4vci::{
     credential::ResponseEnum,
     metadata::AuthorizationMetadata,
     openidconnect::{
-        reqwest::async_http_client, AuthorizationCode, ClientId, CsrfToken, IssuerUrl,
+        reqwest::ClientBuilder, AuthorizationCode, ClientId, CsrfToken, IssuerUrl,
         OAuth2TokenResponse, PkceCodeChallenge, RedirectUrl,
     },
     profiles::CredentialMetadataProfile,
@@ -18,12 +18,11 @@ use oid4vci::{
         Proof, ProofOfPossession, ProofOfPossessionController, ProofOfPossessionParams,
     },
 };
-use ssi_claims::{
-    jwt::ToDecodedJWT, vc::v1::data_integrity::any_credential_from_json_str, VerificationParameters,
-};
+use ssi_claims::{vc::v1::data_integrity::any_credential_from_json_str, VerificationParameters};
 use ssi_dids::AnyDidMethod;
 use ssi_dids_core::{DIDResolver, VerificationMethodDIDResolver};
 use ssi_jwk::{ECParams, Params, JWK};
+use ssi_jwt::ToDecodedJWT;
 use ssi_verification_methods::AnyMethod;
 use time::Duration;
 use tracing::info;
@@ -35,14 +34,16 @@ pub async fn initiate_oid4vci(base_url: Url) -> Result<()> {
     info!("Loading mDL and key...");
     let wallet = generate_credential();
 
+    let async_http_client = ClientBuilder::new().build()?;
+
     let issuer_metadata = CredentialIssuerMetadata::discover_async(
         IssuerUrl::new(base_url.to_string()).unwrap(),
-        async_http_client,
+        &async_http_client,
     )
     .await
     .context("Issuer metadata discovery failed")?;
     let authorization_metadata =
-        AuthorizationMetadata::discover_async(&issuer_metadata, None, async_http_client)
+        AuthorizationMetadata::discover_async(&issuer_metadata, None, &async_http_client)
             .await
             .context("Authorization server discovery failed")?;
     let client = Client::from_issuer_metadata(
@@ -96,7 +97,7 @@ pub async fn initiate_oid4vci(base_url: Url) -> Result<()> {
     let token_response = client
         .exchange_code(AuthorizationCode::new(code))
         .set_pkce_verifier(pkce_verifier)
-        .request_async(async_http_client)
+        .request_async(&async_http_client)
         .await
         .context("Token exchange failed")?;
 
@@ -133,7 +134,7 @@ pub async fn initiate_oid4vci(base_url: Url) -> Result<()> {
         .set_proof(Some(Proof::JWT {
             jwt: pop.to_jwt().unwrap(),
         }))
-        .request_async(async_http_client)
+        .request_async(&async_http_client)
         .await
         .context("Credential request failed")?;
 

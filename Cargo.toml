@@ -7,31 +7,33 @@ license = "Apache-2.0 OR MIT"
 description = "CLI tool for testing OID4VC protocol implementations"
 repository = "https://github.com/spruceid/oid4vc_cli_wallet"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
 [dependencies]
-anyhow = "1.0.75"
-base64 = "0.21.2"
-clap = { version = "4.3.21", features = ["derive"] }
-did-method-key = { git = "https://github.com/spruceid/ssi.git", branch = "main" }
-inquire = "0.6.2"
+did-method-key = "0.3.0"
+ssi-claims = "0.1.0"
+ssi-dids = "0.2.0"
+ssi-dids-core = "0.1.0"
+ssi-jwk = "0.2.1"
+ssi-jwt = "0.2.0"
+ssi-verification-methods = "0.1.0"
+
 isomdl180137 = { path = "../isomdl-18013-7/lib" }
 josekit = { git = "https://github.com/cobward/josekit-rs", rev = "635c8a7" }
 # oid4vci = { git = "https://github.com/spruceid/oid4vci-rs.git", rev = "bee9a3d" }
 oid4vci = { path = "../oid4vci-rs/" }
 oidc4vp = { git = "https://github.com/spruceid/oidc4vp-rs.git", rev = "22ddab2" }
+
+anyhow = "1.0.75"
+base64 = "0.21.2"
+clap = { version = "4.3.21", features = ["derive"] }
+inquire = "0.6.2"
 open = "5.0.0"
+openidconnect = { version = "4.0.0-alpha.2", features = ["timing-resistant-secret-traits", "reqwest"] }
 p256 = { version = "0.13.2", features = ["jwk"] }
 rand = "0.8.5"
 reqwest = { version = "0.11.20", features = ["native-tls"] }
 sec1 = "0.7.3"
 serde = "1.0.183"
 serde_json = "1.0.105"
-ssi-claims = { git = "https://github.com/spruceid/ssi.git", branch = "main" }
-ssi-dids = { git = "https://github.com/spruceid/ssi.git", branch = "main" }
-ssi-dids-core = { git = "https://github.com/spruceid/ssi.git", branch = "main" }
-ssi-jwk = { git = "https://github.com/spruceid/ssi.git", branch = "main" }
-ssi-verification-methods = { git = "https://github.com/spruceid/ssi.git", branch = "main" }
 time = "0.3.25"
 tokio = { version = "1.32.0", features = ["macros", "rt", "fs", "io-util"] }
 tracing = "0.1.40"
