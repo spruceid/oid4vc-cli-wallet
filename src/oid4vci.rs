@@ -13,7 +13,7 @@ use oid4vci::{
         reqwest::ClientBuilder, AuthorizationCode, ClientId, CsrfToken, IssuerUrl,
         OAuth2TokenResponse, PkceCodeChallenge, RedirectUrl,
     },
-    profiles::CredentialMetadataProfile,
+    profiles::CredentialConfigurationProfile,
     proof_of_possession::{
         Proof, ProofOfPossession, ProofOfPossessionController, ProofOfPossessionParams,
     },

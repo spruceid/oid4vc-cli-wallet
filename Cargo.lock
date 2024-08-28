@@ -3936,6 +3936,7 @@ dependencies = [
 [[package]]
 name = "oid4vci"
 version = "0.1.0"
+source = "git+https://github.com/spruceid/oid4vci-rs.git?branch=feat/updates-for-sprucekit-integration#41547792560e3ef7024c434a9b269c9d83bd77e7"
 dependencies = [
  "async-signature",
  "base64 0.21.7",
