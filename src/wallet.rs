@@ -19,6 +19,10 @@ use time::OffsetDateTime;
 
 pub(crate) fn generate_credential() -> Wallet {
     let key = p256::SecretKey::random(&mut rand::thread_rng());
+    generate_credential_from_key(key)
+}
+
+pub(crate) fn generate_credential_from_key(key: p256::SecretKey) -> Wallet {
     let issuer = issuer();
 
     let doc_type = String::from("org.iso.18013.5.1.mDL");
@@ -30,7 +34,7 @@ pub(crate) fn generate_credential() -> Wallet {
     let validity_info = ValidityInfo {
         signed: OffsetDateTime::now_utc(),
         valid_from: OffsetDateTime::now_utc(),
-        valid_until: OffsetDateTime::now_utc() + Duration::from_secs(60),
+        valid_until: OffsetDateTime::now_utc() + Duration::from_secs(60 * 60 * 24 * 30 * 12 * 10),
         expected_update: None,
     };
 
